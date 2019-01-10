@@ -3,6 +3,12 @@
 # This script is used to abstract SSHing into multiple machines so we
 # don't have to keep doing copy and paste jobs aginst the hardware list.
 #
+# Environment variables we care about:
+#
+# DEBUG - Prints debug output and doesn't actually run any commands.
+# SSH_OPTS - options to pass into SSH.  
+#	A good one is "-oBatchMode=yes" so that passwords aren't prompted for, which is useful in automation.
+#
 
 # Errors are fatal
 set -e 
@@ -335,8 +341,9 @@ then
 	>&2 echo "hostnum=$HOST_NUM"
 	>&2 echo "dump=$DUMP"
 	>&2 echo "loop=$LOOP"
+	>&2 echo "file=$FILE"
 	>&2 echo "commands=$@"
-	>&2 echo "all2=$GROUP,$HOST_NUM,$DUMP,$LOOP,$@"
+	>&2 echo "all2=$GROUP,$HOST_NUM,$DUMP,$LOOP,$FILE,$@"
 	>&2 echo
 	exit 1
 fi
@@ -533,7 +540,7 @@ function ssh_to() {
 		tmux rename-window "$HOSTNAME" 2> /dev/null || true
 	fi
 
-	ssh $HOST $@ || true
+	ssh $SSH_OPTS $HOST $@ || true
 
 	#
 	# Restore the old window name
